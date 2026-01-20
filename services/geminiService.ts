@@ -1,4 +1,3 @@
-
 /**
  * @file This service handles all interactions with the Google Gemini API.
  */
@@ -275,7 +274,6 @@ export async function generateNftDetails(description: string): Promise<{ nftTitl
   } catch (error) { return handleApiError(error); }
 }
 
-/** FIX: Added generateNftPromptIdeas required by NftMintingStation component */
 export async function generateNftPromptIdeas(hero: Hero, theme: NftTheme, dpalCategory: Category): Promise<string[]> {
   if (!isAiEnabled()) return ["Decentralized Oversight Shard", "Truth Network Artifact", "Community Governance Token"];
   try {
