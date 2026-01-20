@@ -1,0 +1,16 @@
+
+{
+  "name": "DPAL Ledger",
+  "short_name": "DPAL",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#06b6d4",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/google/material-design-icons/master/png/action/account_balance/white/2x/ic_account_balance_white_48dp.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

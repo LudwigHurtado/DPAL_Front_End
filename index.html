@@ -1,0 +1,106 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>DPAL: Decentralized Public Accountability Ledger</title>
+    
+    <!-- iOS / Apple Web App Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DPAL">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/google/material-design-icons/master/png/action/account_balance/white/2x/ic_account_balance_white_48dp.png">
+    
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@19.0.0",
+    "react-dom": "https://esm.sh/react-dom@19.0.0",
+    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.20.0",
+    "react-grid-layout": "https://esm.sh/react-grid-layout@1.5.0",
+    "clsx": "https://esm.sh/clsx@2.1.1",
+    "tailwind-merge": "https://esm.sh/tailwind-merge@2.5.2",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+  }
+}
+</script>
+    <style>
+      /* Base System Colors */
+      body {
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        background-color: #000;
+        margin: 0;
+        transition: font-size 0.3s ease;
+      }
+
+      /* Interface Scaling Protocols */
+      html.scale-standard { font-size: 16px; }
+      html.scale-large { font-size: 18px; }
+      html.scale-ultra { font-size: 21px; }
+      html.scale-magnified { font-size: 24px; }
+
+      /* Responsive Adjustments for Scaling */
+      @media (max-width: 640px) {
+        html.scale-standard { font-size: 14px; }
+        html.scale-large { font-size: 16px; }
+        html.scale-ultra { font-size: 18px; }
+        html.scale-magnified { font-size: 20px; }
+      }
+
+      /* Global Scrollbar Refinement */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #09090b;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #27272a;
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #3f3f46;
+      }
+
+      /* React Grid Layout specific styles */
+      .react-grid-item.react-grid-placeholder {
+        background: rgba(34, 211, 238, 0.1) !important;
+        border-radius: 1.5rem !important;
+        border: 2px dashed rgba(34, 211, 238, 0.3) !important;
+        opacity: 0.5 !important;
+      }
+      .react-resizable-handle {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        bottom: 0;
+        right: 0;
+        cursor: se-resize;
+      }
+      .react-resizable-handle::after {
+        content: "";
+        position: absolute;
+        right: 5px;
+        bottom: 5px;
+        width: 5px;
+        height: 5px;
+        border-right: 2px solid rgba(255, 255, 255, 0.2);
+        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+      }
+    </style>
+  <link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

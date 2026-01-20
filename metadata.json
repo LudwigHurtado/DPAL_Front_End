@@ -1,0 +1,9 @@
+{
+  "name": "Copy of DPAL: Decentralized Public Accountability Ledger",
+  "description": "A next-generation reporting and accountability platform where people can report problems, track responses, and build community trust. Every report is part of a decentralized ledger, creating a permanent, transparent, and searchable record.",
+  "requestFramePermissions": [
+    "microphone",
+    "camera",
+    "geolocation"
+  ]
+}
