@@ -15,7 +15,8 @@
     "react-grid-layout": "1.5.0",
     "clsx": "2.1.1",
     "tailwind-merge": "2.5.2",
-    "mongoose": "^9.1.4"
+    "mongoose": "^9.1.4",
+    "buffer": "^6.0.3"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

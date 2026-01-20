@@ -1,9 +1,6 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { useTranslations } from '../i18n';
-// Moved Category from import type to regular import because it's used as a value (Object.values)
+import React, { useState, useMemo } from 'react';
 import { Category, type Hero, type Report, type NftTheme } from '../types';
 import { FORGE_TRAITS, NFT_THEMES } from '../constants';
-// Added missing Broadcast icon to the imports
 import { Gem, Coins, Loader, Check, Sparkles, Database, Target, Zap, ShieldCheck, FileText, ArrowRight, RefreshCw, X, Broadcast } from './icons';
 import NftCard from './NftCard';
 
@@ -15,7 +12,6 @@ interface NftMintingStationProps {
 }
 
 const NftMintingStation: React.FC<NftMintingStationProps> = ({ hero, setHero, reports }) => {
-  const { t } = useTranslations();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [theme, setTheme] = useState<NftTheme | ''>('');
   const [dpalCategory, setDpalCategory] = useState<Category | ''>('');
@@ -33,17 +29,12 @@ const NftMintingStation: React.FC<NftMintingStationProps> = ({ hero, setHero, re
   const totalCost = MINT_BASE_COST + traitsCost;
   const canAfford = hero.heroCredits >= totalCost;
 
-  const generateSignature = async (body: any, timestamp: number, nonce: string) => {
-    const raw = JSON.stringify(body) + timestamp + nonce;
-    const encoder = new TextEncoder();
-    const data = encoder.encode(raw);
-    const hash = await crypto.subtle.digest('SHA-256', data);
-    return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-  };
-
   const handleFinalSynthesis = async () => {
     if (!selectedConcept || !canAfford || isMinting) return;
     setIsMinting(true);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
 
     try {
       const timestamp = Date.now();
@@ -51,34 +42,47 @@ const NftMintingStation: React.FC<NftMintingStationProps> = ({ hero, setHero, re
       const idempotencyKey = `mint-${hero.operativeId}-${timestamp}`;
 
       const body = {
+        userId: hero.operativeId, // Assuming operativeId maps to DB userId
         assetDraftId: `draft-${timestamp}`,
         collectionId: 'GENESIS_01',
         chain: 'DPAL_INTERNAL',
         priceCredits: totalCost,
         idempotencyKey,
+        nonce,
+        timestamp,
         attributes: selectedTraits.map(tid => ({
           trait_type: 'Module',
           value: FORGE_TRAITS.find(t => t.id === tid)?.name
         })),
-        meta: { concept: selectedConcept, theme, category: dpalCategory }
+        meta: { 
+          concept: selectedConcept, 
+          theme, 
+          category: dpalCategory 
+        }
       };
 
-      const signature = await generateSignature(body, timestamp, nonce);
-
-      const response = await fetch('/api/nft/mint', {
+      const apiBase = (import.meta as any).env?.VITE_API_BASE || 'https://dpal-backend.up.railway.app';
+      const response = await fetch(`${apiBase}/api/nft/mint`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-dpal-timestamp': timestamp.toString(),
-          'x-dpal-nonce': nonce,
-          'x-dpal-signature': signature
+          'x-dpal-nonce': nonce
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
+        signal: controller.signal
       });
 
+      clearTimeout(timeoutId);
+
+      if (!response.headers.get('content-type')?.includes('application/json')) {
+        const text = await response.text();
+        throw new Error(`Unexpected non-JSON response from server: ${text.substring(0, 200)}...`);
+      }
+
       if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'MINT_FAILED');
+        const errorData = await response.json();
+        throw new Error(errorData.message || `MINT_FAILED (${response.status})`);
       }
 
       const receipt = await response.json();
@@ -91,7 +95,7 @@ const NftMintingStation: React.FC<NftMintingStationProps> = ({ hero, setHero, re
       const finalReport: Report = {
           id: receipt.tokenId,
           title: selectedConcept,
-          description: `Minted via DPAL Oracle. Framework: ${theme}. Signature: ${receipt.txHash}`,
+          description: `Minted via DPAL Oracle. Framework: ${theme}. Block: ${receipt.txHash}`,
           category: dpalCategory as Category,
           location: 'Vanguard_Lab',
           timestamp: new Date(),
@@ -104,7 +108,7 @@ const NftMintingStation: React.FC<NftMintingStationProps> = ({ hero, setHero, re
           earnedNft: {
               source: 'minted',
               title: selectedConcept,
-              imageUrl: `https://api.dpal.net/v1/assets/${receipt.tokenId}.png`,
+              imageUrl: receipt.imageUri, // Backend provided URI
               mintCategory: dpalCategory as Category,
               blockNumber: 6843021,
               txHash: receipt.txHash,
@@ -116,8 +120,13 @@ const NftMintingStation: React.FC<NftMintingStationProps> = ({ hero, setHero, re
       setMintedReport(finalReport);
       setRevealActive(true);
     } catch (e: any) {
-      console.error(e);
-      alert(e.message || "Synthesis disrupted. Check terminal connection.");
+      clearTimeout(timeoutId);
+      console.error('[MINT_CLIENT_ERROR]', e);
+      if (e.name === 'AbortError') {
+        alert("Synthesis timed out (60s). The network is congested.");
+      } else {
+        alert(e.message || "Synthesis disrupted. Check terminal connection.");
+      }
     } finally {
       setIsMinting(false);
     }
